@@ -35,11 +35,7 @@ export default class ObjectSchema extends LightningElement {
     }
   }
 
-  
-
   dataTableSetup(tableData) {
-
-    
     this.columns = [
       { label: "Field", fieldName: "apiName" },
       { label: "Type", fieldName: "dataType" },
@@ -84,20 +80,6 @@ export default class ObjectSchema extends LightningElement {
 
     this.completeArray = completeArray;
     this.filteredArray = filteredArray;
-
-    console.log(filteredArray);
-    console.log(dataEntries);
-
-    /*
-    console.log("Data Entries");
-    
-    console.log(this.childRelationships);
-    console.log(this.dependentFields);
-    console.log(this.fields);
-
-    const objectKeys = Object.keys(this.fields);
-    console.log(objectKeys);
-    */
   }
 
   handleFilter() {
@@ -146,7 +128,6 @@ export default class ObjectSchema extends LightningElement {
     });
     
     selectClause = selectClause.substring(0, selectClause.length-1);
-    console.log(selectClause);
     const fromClause = ` FROM ${this.objectApiName}`;
     this.generatedQuery = `${selectClause} ${fromClause}`
   }

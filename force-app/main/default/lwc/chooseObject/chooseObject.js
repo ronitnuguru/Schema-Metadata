@@ -12,7 +12,6 @@ export default class ChooseObject extends LightningElement {
     }
 
     handleObjectSubmit(){
-        console.log(this.searchTerm);
         this.objectSchemaSuccess = true;
         this.objectApiName = this.searchTerm;
     }
