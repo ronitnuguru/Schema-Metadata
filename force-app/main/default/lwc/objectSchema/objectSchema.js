@@ -21,6 +21,12 @@ export default class ObjectSchema extends LightningElement {
   @track filteredArray;
   @track completeArray;
 
+  @track cumulusArrayFields;
+  @track cumulusArrayLookup;
+  @track cumulusArrayRecordType;
+
+  @track dataLoaded = false;
+
   
 
   @wire(getObjectInfo, { objectApiName: "$objectApiName" })
@@ -28,14 +34,18 @@ export default class ObjectSchema extends LightningElement {
     if (error) {
       console.log(error);
     } else if (data) {
+
+      this.dataLoaded = false;
       this.cardTitle = `Schema for  ${this.objectApiName}`;
       this.objectMetaData = data;
       //console.log(data);
       this.dataTableSetup(this.objectMetaData);
+      this.dataLoaded = true;
     }
   }
 
   dataTableSetup(tableData) {
+    console.log('tableData',tableData);
     this.columns = [
       { label: "Field", fieldName: "apiName" },
       { label: "Type", fieldName: "dataType" },
@@ -46,9 +56,12 @@ export default class ObjectSchema extends LightningElement {
     this.fields = tableData.fields;
     let filteredArray = [];
     let completeArray = [];
+    let cumulusArrayFields = [];
+    let cumulusArrayLookup = [];
+    let cumulusArrayRecordType = [];
+    
     const dataEntries = Object.entries(this.fields).filter(field => {
       const filteredFields = field[1];
-
       if (
         filteredFields.createable &&
         filteredFields.updateable &&
@@ -65,6 +78,8 @@ export default class ObjectSchema extends LightningElement {
         ];
       }
 
+      
+
       completeArray = [
         {
           apiName: filteredFields.apiName,
@@ -74,12 +89,66 @@ export default class ObjectSchema extends LightningElement {
         },
         ...completeArray
       ];
+
+      if (
+        filteredFields.createable &&
+        filteredFields.updateable &&
+        filteredFields.apiName !== "OwnerId"
+      ) {
+        if(filteredFields.relationshipName === null){
+          cumulusArrayFields = [
+            {
+              apiName: (filteredFields.apiName == 'Id')?'sf_' + filteredFields.apiName:filteredFields.apiName,
+              dataType: filteredFields.dataType,
+              parent: filteredFields.relationshipName,
+              referenceToInfos: [filteredFields.referenceToInfos]
+            },
+            ...cumulusArrayFields
+          ];
+        }else if(filteredFields.relationshipName !== null && filteredFields.relationshipName !== 'RecordType') {
+          let selfRef = (this.objectApiName === filteredFields.referenceToInfos[0].apiName )?true:false;
+          cumulusArrayLookup = [
+            {
+              apiName: filteredFields.apiName,
+              dataType: filteredFields.dataType,
+              parent: filteredFields.relationshipName,
+              referenceToInfos: [filteredFields.referenceToInfos],
+              parentObject: filteredFields.referenceToInfos[0].apiName,
+              selfReference: selfRef
+            },
+            ...cumulusArrayLookup
+          ];
+        }else if(filteredFields.relationshipName !== null && filteredFields.relationshipName === 'RecordType') {
+          cumulusArrayRecordType = [
+            {
+              apiName: filteredFields.apiName,
+              dataType: filteredFields.dataType,
+              parent: filteredFields.relationshipName,
+              referenceToInfos: [filteredFields.referenceToInfos],
+              parentObject: filteredFields.referenceToInfos[0].apiName
+            },
+            ...cumulusArrayRecordType
+          ];
+        }
+
+      }
+
       return filteredFields;
     });
     this.data = completeArray;
 
     this.completeArray = completeArray;
     this.filteredArray = filteredArray;
+
+    this.cumulusArrayFields = cumulusArrayFields;
+    this.cumulusArrayLookup = cumulusArrayLookup;
+    this.cumulusArrayRecordType = cumulusArrayRecordType;
+
+    /*
+    console.log('this.cumulusArrayFields', this.cumulusArrayFields.length, this.cumulusArrayFields);
+    console.log('this.cumulusArrayLookup', this.cumulusArrayLookup.length, this.cumulusArrayLookup);
+    console.log('this.cumulusArrayRecordType', this.cumulusArrayRecordType.length, this.cumulusArrayRecordType);
+    /* */
   }
 
   handleFilter() {

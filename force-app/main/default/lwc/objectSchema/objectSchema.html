@@ -31,16 +31,32 @@
     </template>
 
     <div class="slds-m-around_medium">
-      <div style="height: 800px;">
-        <lightning-datatable
-          key-field="id"
-          data={data}
-          columns={columns}
-          hide-checkbox-column
-          show-row-number-column
-        >
-        </lightning-datatable>
-      </div>
+      <template if:true={dataLoaded}>
+          
+          
+          <code>
+          Insert {objectApiName}:<br/>
+          &nbsp;&nbsp;sf_object: {objectApiName}<br/>
+          &nbsp;&nbsp;table: {objectApiName}<br/>
+          &nbsp;&nbsp;fields:<br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;Id: sf_id<br/>
+              <template for:each={cumulusArrayFields} for:item="field">
+                &nbsp;&nbsp;&nbsp;&nbsp;{field.apiName}: {field.apiName}<br key={field.apiName}/>
+              </template>
+              <template for:each={cumulusArrayRecordType} for:item="field">
+                &nbsp;&nbsp;&nbsp;&nbsp;{field.apiName}: {field.apiName}<br key={field.apiName}/>
+              </template>
+
+              &nbsp;&nbsp;lookups:<br/>
+            <template for:each={cumulusArrayLookup} for:item="field">
+              &nbsp;&nbsp;&nbsp;&nbsp;{field.apiName}:<br key={field.apiName}/>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;table: {field.parentObject}<br key={field.apiName}/>
+                <template if:true={field.selfReference}>
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;after: Insert {objectApiName}<br key={field.apiName}/>
+                </template>
+            </template>
+          </code>
+      </template>
     </div>
   </lightning-card>
 </template>
